@@ -2,7 +2,7 @@
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
-
+use App\Vehicle;
 use Illuminate\Http\Request;
 
 class VehicleController extends Controller {
@@ -14,7 +14,11 @@ class VehicleController extends Controller {
 	 */
 	public function index()
 	{
-		return "I am in Index.";
+		$vehicles = Vehicle::all();
+
+
+		return response()->json(['data'=>$vehicles], 200);
+
 	}
 
 	
