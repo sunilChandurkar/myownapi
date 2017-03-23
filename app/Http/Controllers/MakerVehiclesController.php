@@ -5,9 +5,14 @@ use App\Http\Controllers\Controller;
 use App\Maker;
 use App\Vehicle;
 use Illuminate\Http\Request;
+use App\Http\Requests\CreateVehicleRequest;
 
 class MakerVehiclesController extends Controller {
 
+	public function __construct()
+	{
+		$this->middleware('auth.basic.once', ['except'=>['index', 'show']]);
+	}
 	/**
 	 * Display a listing of the resource.
 	 *
@@ -32,9 +37,24 @@ class MakerVehiclesController extends Controller {
 	 *
 	 * @return Response
 	 */
-	public function store()
+	public function store(CreateVehicleRequest $request, $maker_id)
 	{
-		//
+
+		$maker = Maker::find($maker_id);
+
+
+
+		if(!$maker)
+		{
+			return response()->json(['message'=>'This maker does not exist.', 'code'=>404], 404);
+		}
+
+		$values = $request->all();
+
+		$maker->vehicles()->create($values);
+
+		return response()->json(['message'=>'Vehicle was created.'], 201);
+
 	}
 
 	/**
@@ -70,9 +90,33 @@ class MakerVehiclesController extends Controller {
 	 * @param  int  $id
 	 * @return Response
 	 */
-	public function update($id)
+	public function update(CreateVehicleRequest $request, $maker_id, $vehicle_id)
 	{
-		//
+		$maker = Maker::find($maker_id);
+
+		if(!$maker)
+		{
+			return response()->json(['message'=>'This maker does not exist.', 'code'=>404], 404);
+		}
+
+		$vehicle = $maker->vehicles->find($vehicle_id);
+
+		if(!$vehicle)
+		{
+			return response()->json(['message'=>'This vehicle does not exist.', 'code'=>404], 404);
+		}
+
+		$vehicle->color = $request->input('color');
+
+		$vehicle->power = $request->input('power');
+
+		$vehicle->capacity = $request->input('capacity');
+
+		$vehicle->speed = $request->input('speed');
+
+		$vehicle->save();
+
+		return response()->json(['message'=>'Vehicle was updated.'], 200);
 	}
 
 	/**
@@ -81,9 +125,26 @@ class MakerVehiclesController extends Controller {
 	 * @param  int  $id
 	 * @return Response
 	 */
-	public function destroy($id)
+	public function destroy($maker_id, $vehicle_id)
 	{
-		//
+		$maker = Maker::find($maker_id);
+
+		if(!$maker)
+		{
+			return response()->json(['message'=>'This maker does not exist.', 'code'=>404], 404);
+		}
+
+		$vehicle = $maker->vehicles->find($vehicle_id);
+
+		if(!$vehicle)
+		{
+			return response()->json(['message'=>'This vehicle does not exist.', 'code'=>404], 404);
+		}
+
+		$vehicle->delete();
+
+		return response()->json(['message'=>'Vehicle was deleted.'], 200);
+
 	}
 
 }

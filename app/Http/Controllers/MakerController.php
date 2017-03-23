@@ -4,9 +4,16 @@ use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Maker;
 use Illuminate\Http\Request;
+use App\Http\Requests\CreateMakerRequest;
+
+use App\Vehicle;
 
 class MakerController extends Controller {
 
+	public function __construct()
+	{
+		$this->middleware('auth.basic.once', ['except'=>['index', 'show']]);
+	}
 	/**
 	 * Display a listing of the resource.
 	 *
@@ -26,9 +33,13 @@ class MakerController extends Controller {
 	 *
 	 * @return Response
 	 */
-	public function store()
+	public function store(CreateMakerRequest $request)
 	{
-		//
+		$values = $request->only(['name', 'phone']);
+
+		Maker::create($values);
+
+		return response()->json(['message'=>'Maker added correctly.'], 201);
 	}
 
 	/**
@@ -56,9 +67,26 @@ class MakerController extends Controller {
 	 * @param  int  $id
 	 * @return Response
 	 */
-	public function update($id)
+	public function update(CreateMakerRequest $request, $id)
 	{
-		//
+		$maker = Maker::find($id);
+
+		if(!$maker)
+		{
+			return response()->json(['message'=>'This maker does not exist.', 'code'=>404], 404);
+		}
+
+		$name = $request->input('name');
+
+		$phone = $request->input('phone');
+
+		$maker->name = $name;
+
+		$maker->phone = $phone;
+
+		$maker->save();
+
+		return response()->json(['message'=>'Maker has been updated.'], 200);
 	}
 
 	/**
@@ -69,7 +97,23 @@ class MakerController extends Controller {
 	 */
 	public function destroy($id)
 	{
-		//
+		$maker = Maker::find($id);
+
+		if(!$maker)
+		{
+			return response()->json(['message'=>'This maker does not exist', 'code'=>404], 404);
+		}	
+
+		$vehicles = $maker->vehicles;
+
+		if (sizeof($vehicles)>0)
+		{
+			return response()->json(['message'=>'Maker has Vehicles. Delete vehicles first.', 'code'=>409], 409);
+		}
+
+		$maker->delete();
+
+		return response()->json(['message'=>'Maker has been deleted.'], 200);
 	}
 
 }
