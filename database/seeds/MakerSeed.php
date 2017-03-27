@@ -15,7 +15,7 @@ class MakerSeed extends Seeder {
 	public function run()
 	{
 		$faker = Faker::create();
-		for($i=0; $i<5; $i++)
+		for($i=0; $i<100; $i++)
 		{
 		Maker::create([
 			'name'=> $faker->word(),
